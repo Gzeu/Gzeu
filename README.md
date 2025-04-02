@@ -25,7 +25,7 @@ IT professional with over 10 years of experience in system administration, netwo
 ### Experience Highlights
 - **Technical Team Lead @ Ipsos**  
   *2022 - 2024*  
-  Led IT team, managed cloud infrastructure, and implemented AI-driven automation.  
+  Led IT team, managed the local datacenter and local infrastructure, oversaw cloud infrastructure, and implemented automation processes.  
 
 - **IT Support Manager @ Ipsos**  
   *2021 - 2022*  
