@@ -1,4 +1,4 @@
-# George Pricop | Blockchain Developer & AI Automation Specialist
+# George Pricop | Blockchain Developer & AI Automation 
 
 <div align="center">
 
@@ -16,7 +16,7 @@
 
 ## 👨‍💻 About Me
 
-**Blockchain Developer & AI Automation Specialist** based in Bucharest, Romania. I specialize in creating innovative Web3 solutions that bridge traditional finance with decentralized technologies, focusing on **MultiversX ecosystem** and **AI-powered trading systems**.
+I specialize in creating innovative Web3 solutions that bridge traditional finance with decentralized technologies, focusing on **MultiversX ecosystem** and **AI-powered trading systems**.
 
 **What I do:** Build production-ready blockchain applications, AI trading bots, and educational platforms that make Web3 accessible to everyone.
 
@@ -177,7 +177,6 @@
 
 [![Email](https://img.shields.io/badge/📧%20Email-pricopgeorge%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:pricopgeorge@gmail.com)
 [![LinkedIn](https://img.shields.io/badge/💼%20LinkedIn-George%20Pricop-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/george-pricop-61a3a933)
-[![Telegram](https://img.shields.io/badge/💬%20Telegram-@GeorgeWeb3-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/GeorgeWeb3)
 
 **💡 Have a Web3 project idea? Let's build something amazing together!**
 
