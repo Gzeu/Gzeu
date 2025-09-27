@@ -209,7 +209,7 @@ I'm always interested in:
 [![GitHub](https://img.shields.io/badge/GitHub-Gzeu-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Gzeu)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-George%20Pricop-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/george-pricop)
 [![Discord](https://img.shields.io/badge/Discord-Gzeu%235555-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/your-server)
-[![Twitter](https://img.shields.io/badge/Twitter-@GeorgePricop-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/GeorgePricop)
+[![X (Twitter)](https://img.shields.io/badge/X-@GeorgeP95539774-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/GeorgeP95539774)
 
 </div>
 
