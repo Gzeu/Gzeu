@@ -79,47 +79,62 @@ jobs:
           git push || echo "Nothing to push"
 
       - name: 📱 Send Telegram Notification
-        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.TELEGRAM_BOT_TOKEN != ''
+        if: steps.check-sponsors.outputs.new_sponsors == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          MESSAGE="🎉 <b>New GitHub Sponsor!</b>%0A%0A<b>Sponsor:</b> ${{ steps.check-sponsors.outputs.sponsor_info }}%0A<b>Profile:</b> https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}%0A<b>Your Profile:</b> https://github.com/Gzeu%0A<b>Time:</b> $(date)%0A%0AThank you for supporting the projects! 🚀💖"
-          
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d "text=$MESSAGE" \
-            -d "parse_mode=HTML" \
-            -d "disable_web_page_preview=false"
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            MESSAGE="🎉 <b>New GitHub Sponsor!</b>%0A%0A<b>Sponsor:</b> ${{ steps.check-sponsors.outputs.sponsor_info }}%0A<b>Profile:</b> https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}%0A<b>Your Profile:</b> https://github.com/Gzeu%0A<b>Time:</b> $(date)%0A%0AThank you for supporting the projects! 🚀💖"
+            
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+              -d "chat_id=$TELEGRAM_CHAT_ID" \
+              -d "text=$MESSAGE" \
+              -d "parse_mode=HTML" \
+              -d "disable_web_page_preview=false"
+            
+            echo "✅ Telegram notification sent successfully"
+          else
+            echo "⚠️ Telegram credentials not configured - skipping notification"
+          fi
 
       - name: 🎯 Auto-Grant Repository Access
-        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.GH_PAT != ''
+        if: steps.check-sponsors.outputs.new_sponsors == 'true'
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          sponsor="${{ steps.check-sponsors.outputs.sponsor_login }}"
-          
-          # Get sponsor tier amount
-          tier_amount=$(jq -r --arg login "$sponsor" '.data.viewer.sponsors.nodes[] | select(.login == $login) | (.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100' .sponsors-data/current-sponsors.json)
-          
-          echo "🎯 Processing access for $sponsor (Tier: \$$tier_amount/month)"
-          
-          # Tier 1: $5+ - Access to selected private repos
-          if (( $(echo "$tier_amount >= 5" | bc -l) )); then
-            echo "✅ Granting Tier 1 access to private repos"
+          if [ -n "$GH_PAT" ]; then
+            sponsor="${{ steps.check-sponsors.outputs.sponsor_login }}"
             
-            # Add to private repos (adjust repo names as needed)
-            repos_to_grant=("mvx-proofmind" "carbonflow-ai")
+            # Get sponsor tier amount
+            tier_amount=$(jq -r --arg login "$sponsor" '.data.viewer.sponsors.nodes[] | select(.login == $login) | (.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100' .sponsors-data/current-sponsors.json)
             
-            for repo in "${repos_to_grant[@]}"; do
-              curl -X PUT \
-                -H "Authorization: Bearer $GH_PAT" \
-                -H "Accept: application/vnd.github+json" \
-                "https://api.github.com/repos/Gzeu/$repo/collaborators/$sponsor" \
-                -d '{"permission":"pull"}' || echo "Failed to add $sponsor to $repo"
-            done
-          fi
-          
-          # Tier 2: $25+ - VIP sponsor detected
-          if (( $(echo "$tier_amount >= 25" | bc -l) )); then
-            echo "🌟 VIP sponsor detected: $sponsor"
+            echo "🎯 Processing access for $sponsor (Tier: \$$tier_amount/month)"
+            
+            # Tier 1: $5+ - Access to selected private repos
+            if (( $(echo "$tier_amount >= 5" | bc -l) )); then
+              echo "✅ Granting Tier 1 access to private repos"
+              
+              # Add to private repos (adjust repo names as needed)
+              repos_to_grant=("mvx-proofmind" "carbonflow-ai")
+              
+              for repo in "${repos_to_grant[@]}"; do
+                curl -X PUT \
+                  -H "Authorization: Bearer $GH_PAT" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/repos/Gzeu/$repo/collaborators/$sponsor" \
+                  -d '{"permission":"pull"}' || echo "Failed to add $sponsor to $repo"
+              done
+            fi
+            
+            # Tier 2: $25+ - VIP sponsor detected
+            if (( $(echo "$tier_amount >= 25" | bc -l) )); then
+              echo "🌟 VIP sponsor detected: $sponsor"
+            fi
+            
+            echo "✅ Repository access management completed"
+          else
+            echo "⚠️ GitHub PAT not configured - skipping auto-grant access"
           fi
 
       - name: 📊 Update Sponsor Stats
