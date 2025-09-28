@@ -1,1 +1,1 @@
-{"errors":[{"path":["query","viewer","sponsors","nodes","sponsorshipForViewerAsSponsorable"],"extensions":{"code":"selectionMismatch","nodeName":"Sponsor"},"locations":[{"line":1,"column":41}],"message":"Selections can't be made directly on unions (see selections on Sponsor)"}]}
+{"data":{"viewer":{"sponsors":{"nodes":[]}}}}
