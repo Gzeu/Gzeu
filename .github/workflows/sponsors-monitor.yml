@@ -1,0 +1,190 @@
+name: 🎯 Monitor GitHub Sponsors
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours to avoid rate limits
+  workflow_dispatch: # Manual trigger for testing
+
+permissions:
+  contents: write
+
+jobs:
+  monitor-sponsors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🔍 Check Current Sponsors
+        id: check-sponsors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Fetching current sponsors..."
+          
+          # Create sponsors data directory
+          mkdir -p .sponsors-data
+          
+          # Fetch current sponsors using GraphQL API
+          curl -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -X POST \
+            -d '{"query":"query { viewer { sponsors(first: 100) { nodes { login createdAt sponsorshipForViewerAsSponsorable { createdAt tier { monthlyPriceInCents name } } } } } }"}' \
+            https://api.github.com/graphql > .sponsors-data/current-sponsors.json
+          
+          # Check if we have previous sponsors data
+          if [ -f ".sponsors-data/previous-sponsors.json" ]; then
+            echo "📊 Comparing with previous sponsors..."
+            
+            # Extract current sponsor logins
+            current_sponsors=$(jq -r '.data.viewer.sponsors.nodes[].login' .sponsors-data/current-sponsors.json | sort)
+            previous_sponsors=$(jq -r '.data.viewer.sponsors.nodes[].login' .sponsors-data/previous-sponsors.json | sort)
+            
+            # Find new sponsors
+            new_sponsors=$(comm -13 <(echo "$previous_sponsors") <(echo "$current_sponsors"))
+            
+            if [ -n "$new_sponsors" ]; then
+              echo "🎉 New sponsors detected!"
+              echo "new_sponsors=true" >> $GITHUB_OUTPUT
+              
+              # Get detailed info for new sponsors
+              for sponsor in $new_sponsors; do
+                sponsor_info=$(jq -r --arg login "$sponsor" '.data.viewer.sponsors.nodes[] | select(.login == $login) | "\(.login) - Tier: \(.sponsorshipForViewerAsSponsorable.tier.name // "Custom") - $\((.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100)/month"' .sponsors-data/current-sponsors.json)
+                echo "sponsor_info=$sponsor_info" >> $GITHUB_OUTPUT
+                echo "sponsor_login=$sponsor" >> $GITHUB_OUTPUT
+                break # Take first new sponsor for notification
+              done
+            else
+              echo "📊 No new sponsors detected"
+              echo "new_sponsors=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "🚀 First run - creating baseline"
+            echo "new_sponsors=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Save current as previous for next run
+          cp .sponsors-data/current-sponsors.json .sponsors-data/previous-sponsors.json
+          
+          # Show current sponsor count
+          sponsor_count=$(jq '.data.viewer.sponsors.nodes | length' .sponsors-data/current-sponsors.json)
+          echo "📈 Total sponsors: $sponsor_count"
+
+      - name: 💾 Commit Sponsor Data
+        if: always()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Sponsor Bot"
+          git add .sponsors-data/
+          git diff --staged --quiet || git commit -m "📊 Update sponsor data - $(date)"
+          git push || echo "Nothing to push"
+
+      - name: 🎊 Send Discord Notification
+        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.DISCORD_WEBHOOK != ''
+        run: |
+          curl -H "Content-Type: application/json" -X POST \
+            -d '{
+              "embeds": [{
+                "title": "🎉 New GitHub Sponsor!",
+                "description": "**Sponsor:** ${{ steps.check-sponsors.outputs.sponsor_info }}\n**Profile:** https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}\n**Your Profile:** https://github.com/Gzeu\n\nThank you for supporting the projects! 💖",
+                "color": 3447003,
+                "thumbnail": {
+                  "url": "https://github.githubassets.com/images/modules/site/sponsors/pixel-mona-heart.gif"
+                },
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+              }],
+              "username": "Sponsor Bot",
+              "avatar_url": "https://github.githubassets.com/images/modules/site/sponsors/pixel-mona-heart.gif"
+            }' \
+            "${{ secrets.DISCORD_WEBHOOK }}"
+
+      - name: 📧 Send Email Notification
+        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.SMTP_PASSWORD != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🎉 New GitHub Sponsor - ${{ steps.check-sponsors.outputs.sponsor_login }}"
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          from: ${{ secrets.SMTP_USERNAME }}
+          html_body: |
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #28a745;">🎉 New GitHub Sponsor!</h2>
+              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <p><strong>Sponsor Details:</strong> ${{ steps.check-sponsors.outputs.sponsor_info }}</p>
+                <p><strong>Sponsor Profile:</strong> <a href="https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}">@${{ steps.check-sponsors.outputs.sponsor_login }}</a></p>
+                <p><strong>Your Profile:</strong> <a href="https://github.com/Gzeu">@Gzeu</a></p>
+                <p><strong>Time:</strong> $(date)</p>
+              </div>
+              <p style="margin-top: 20px;">Thank you for the support! This helps maintain and improve your open source projects. 💜</p>
+            </div>
+
+      - name: 📱 Send Telegram Notification
+        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.TELEGRAM_BOT_TOKEN != ''
+        run: |
+          MESSAGE="🎉 <b>New GitHub Sponsor!</b>%0A%0A<b>Sponsor:</b> ${{ steps.check-sponsors.outputs.sponsor_info }}%0A<b>Profile:</b> https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}%0A<b>Your Profile:</b> https://github.com/Gzeu%0A<b>Time:</b> $(date)%0A%0AThank you for supporting the projects! 🚀💖"
+          
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d "text=$MESSAGE" \
+            -d "parse_mode=HTML" \
+            -d "disable_web_page_preview=false"
+
+      - name: 🎯 Auto-Grant Repository Access
+        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.GH_PAT != ''
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          sponsor="${{ steps.check-sponsors.outputs.sponsor_login }}"
+          
+          # Get sponsor tier amount
+          tier_amount=$(jq -r --arg login "$sponsor" '.data.viewer.sponsors.nodes[] | select(.login == $login) | (.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100' .sponsors-data/current-sponsors.json)
+          
+          echo "🎯 Processing access for $sponsor (Tier: \$$tier_amount/month)"
+          
+          # Tier 1: $5+ - Access to selected private repos
+          if (( $(echo "$tier_amount >= 5" | bc -l) )); then
+            echo "✅ Granting Tier 1 access to private repos"
+            
+            # Add to private repos (adjust repo names as needed)
+            repos_to_grant=("mvx-proofmind" "carbonflow-ai")
+            
+            for repo in "${repos_to_grant[@]}"; do
+              curl -X PUT \
+                -H "Authorization: Bearer $GH_PAT" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/Gzeu/$repo/collaborators/$sponsor" \
+                -d '{"permission":"pull"}' || echo "Failed to add $sponsor to $repo"
+            done
+          fi
+          
+          # Tier 2: $25+ - VIP Discord role (if Discord bot is configured)
+          if (( $(echo "$tier_amount >= 25" | bc -l) )); then
+            echo "🌟 VIP sponsor detected: $sponsor"
+            # You can add Discord role assignment here if you have a Discord bot
+          fi
+
+      - name: 📊 Update Sponsor Stats
+        run: |
+          # Calculate sponsor statistics
+          total_sponsors=$(jq '.data.viewer.sponsors.nodes | length' .sponsors-data/current-sponsors.json)
+          monthly_revenue=$(jq '[.data.viewer.sponsors.nodes[].sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0] | add / 100' .sponsors-data/current-sponsors.json)
+          
+          echo "📊 Current Stats:"
+          echo "   Total Sponsors: $total_sponsors"
+          echo "   Monthly Revenue: \$$monthly_revenue"
+          
+          # Create or update sponsor stats file
+          cat > .sponsors-data/stats.json << EOF
+          {
+            "total_sponsors": $total_sponsors,
+            "monthly_revenue": $monthly_revenue,
+            "last_updated": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: 🎉 Display Current Sponsors (Debug)
+        run: |
+          echo "📋 Current Sponsors Summary:"
+          jq -r '.data.viewer.sponsors.nodes[] | "🎯 @\(.login) - \(.sponsorshipForViewerAsSponsorable.tier.name // "Custom") - $\((.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100)/month"' .sponsors-data/current-sponsors.json || echo "No sponsors data available"
