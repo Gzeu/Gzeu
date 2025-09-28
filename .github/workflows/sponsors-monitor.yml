@@ -24,20 +24,24 @@ jobs:
           # Create sponsors data directory
           mkdir -p .sponsors-data
           
-          # Fetch current sponsors using GraphQL API
+          # Fetch current sponsors using GraphQL API with correct union type syntax
           curl -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -X POST \
-            -d '{"query":"query { viewer { sponsors(first: 100) { nodes { login createdAt sponsorshipForViewerAsSponsorable { createdAt tier { monthlyPriceInCents name } } } } } }"}' \
+            -d '{"query":"query { viewer { sponsors(first: 100) { nodes { ... on User { login createdAt } ... on Organization { login createdAt } sponsorshipForViewerAsSponsorable { createdAt tier { monthlyPriceInCents name } } } } } }"}' \
             https://api.github.com/graphql > .sponsors-data/current-sponsors.json
+          
+          # Debug: Show API response
+          echo "📊 API Response:"
+          cat .sponsors-data/current-sponsors.json
           
           # Check if we have previous sponsors data
           if [ -f ".sponsors-data/previous-sponsors.json" ]; then
             echo "📊 Comparing with previous sponsors..."
             
-            # Extract current sponsor logins
-            current_sponsors=$(jq -r '.data.viewer.sponsors.nodes[].login' .sponsors-data/current-sponsors.json | sort)
-            previous_sponsors=$(jq -r '.data.viewer.sponsors.nodes[].login' .sponsors-data/previous-sponsors.json | sort)
+            # Extract current sponsor logins (handle both User and Organization)
+            current_sponsors=$(jq -r '.data.viewer.sponsors.nodes[].login // empty' .sponsors-data/current-sponsors.json | sort)
+            previous_sponsors=$(jq -r '.data.viewer.sponsors.nodes[].login // empty' .sponsors-data/previous-sponsors.json | sort)
             
             # Find new sponsors
             new_sponsors=$(comm -13 <(echo "$previous_sponsors") <(echo "$current_sponsors"))
@@ -65,8 +69,8 @@ jobs:
           # Save current as previous for next run
           cp .sponsors-data/current-sponsors.json .sponsors-data/previous-sponsors.json
           
-          # Show current sponsor count
-          sponsor_count=$(jq '.data.viewer.sponsors.nodes | length' .sponsors-data/current-sponsors.json)
+          # Show current sponsor count (handle null data)
+          sponsor_count=$(jq '.data.viewer.sponsors.nodes | length // 0' .sponsors-data/current-sponsors.json 2>/dev/null || echo "0")
           echo "📈 Total sponsors: $sponsor_count"
 
       - name: 💾 Commit Sponsor Data
@@ -106,8 +110,8 @@ jobs:
           if [ -n "$GH_PAT" ]; then
             sponsor="${{ steps.check-sponsors.outputs.sponsor_login }}"
             
-            # Get sponsor tier amount
-            tier_amount=$(jq -r --arg login "$sponsor" '.data.viewer.sponsors.nodes[] | select(.login == $login) | (.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100' .sponsors-data/current-sponsors.json)
+            # Get sponsor tier amount (handle null data)
+            tier_amount=$(jq -r --arg login "$sponsor" '.data.viewer.sponsors.nodes[] | select(.login == $login) | (.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100' .sponsors-data/current-sponsors.json 2>/dev/null || echo "0")
             
             echo "🎯 Processing access for $sponsor (Tier: \$$tier_amount/month)"
             
@@ -139,9 +143,9 @@ jobs:
 
       - name: 📊 Update Sponsor Stats
         run: |
-          # Calculate sponsor statistics
-          total_sponsors=$(jq '.data.viewer.sponsors.nodes | length' .sponsors-data/current-sponsors.json)
-          monthly_revenue=$(jq '[.data.viewer.sponsors.nodes[].sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0] | add / 100' .sponsors-data/current-sponsors.json)
+          # Calculate sponsor statistics (handle null data gracefully)
+          total_sponsors=$(jq '.data.viewer.sponsors.nodes | length // 0' .sponsors-data/current-sponsors.json 2>/dev/null || echo "0")
+          monthly_revenue=$(jq '[.data.viewer.sponsors.nodes[]?.sponsorshipForViewerAsSponsorable?.tier?.monthlyPriceInCents // 0] | add / 100 // 0' .sponsors-data/current-sponsors.json 2>/dev/null || echo "0")
           
           echo "📊 Current Stats:"
           echo "   Total Sponsors: $total_sponsors"
@@ -159,4 +163,11 @@ jobs:
       - name: 🎉 Display Current Sponsors (Debug)
         run: |
           echo "📋 Current Sponsors Summary:"
-          jq -r '.data.viewer.sponsors.nodes[] | "🎯 @\(.login) - \(.sponsorshipForViewerAsSponsorable.tier.name // "Custom") - $\((.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100)/month"' .sponsors-data/current-sponsors.json || echo "No sponsors data available"
+          # Handle case where data might be null or have errors
+          if jq -e '.data.viewer.sponsors.nodes' .sponsors-data/current-sponsors.json >/dev/null 2>&1; then
+            jq -r '.data.viewer.sponsors.nodes[] | "🎯 @\(.login // "unknown") - \(.sponsorshipForViewerAsSponsorable.tier.name // "Custom") - $\((.sponsorshipForViewerAsSponsorable.tier.monthlyPriceInCents // 0) / 100)/month"' .sponsors-data/current-sponsors.json || echo "No sponsors found"
+          else
+            echo "No valid sponsor data available or GraphQL errors detected"
+            echo "API Response contains:"
+            jq '.' .sponsors-data/current-sponsors.json
+          fi
