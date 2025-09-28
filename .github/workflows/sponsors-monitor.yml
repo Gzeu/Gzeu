@@ -1,8 +1,8 @@
 name: 🎯 Monitor GitHub Sponsors
 on:
   schedule:
-    - cron: '0 */6 * * *' # Every 6 hours to avoid rate limits
-  workflow_dispatch: # Manual trigger for testing
+    - cron: '0 */6 * * *' # Every 6 hours
+  workflow_dispatch: # Manual trigger
 
 permissions:
   contents: write
@@ -78,48 +78,6 @@ jobs:
           git diff --staged --quiet || git commit -m "📊 Update sponsor data - $(date)"
           git push || echo "Nothing to push"
 
-      - name: 🎊 Send Discord Notification
-        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.DISCORD_WEBHOOK != ''
-        run: |
-          curl -H "Content-Type: application/json" -X POST \
-            -d '{
-              "embeds": [{
-                "title": "🎉 New GitHub Sponsor!",
-                "description": "**Sponsor:** ${{ steps.check-sponsors.outputs.sponsor_info }}\n**Profile:** https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}\n**Your Profile:** https://github.com/Gzeu\n\nThank you for supporting the projects! 💖",
-                "color": 3447003,
-                "thumbnail": {
-                  "url": "https://github.githubassets.com/images/modules/site/sponsors/pixel-mona-heart.gif"
-                },
-                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
-              }],
-              "username": "Sponsor Bot",
-              "avatar_url": "https://github.githubassets.com/images/modules/site/sponsors/pixel-mona-heart.gif"
-            }' \
-            "${{ secrets.DISCORD_WEBHOOK }}"
-
-      - name: 📧 Send Email Notification
-        if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.SMTP_PASSWORD != ''
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "🎉 New GitHub Sponsor - ${{ steps.check-sponsors.outputs.sponsor_login }}"
-          to: ${{ secrets.NOTIFICATION_EMAIL }}
-          from: ${{ secrets.SMTP_USERNAME }}
-          html_body: |
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #28a745;">🎉 New GitHub Sponsor!</h2>
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                <p><strong>Sponsor Details:</strong> ${{ steps.check-sponsors.outputs.sponsor_info }}</p>
-                <p><strong>Sponsor Profile:</strong> <a href="https://github.com/${{ steps.check-sponsors.outputs.sponsor_login }}">@${{ steps.check-sponsors.outputs.sponsor_login }}</a></p>
-                <p><strong>Your Profile:</strong> <a href="https://github.com/Gzeu">@Gzeu</a></p>
-                <p><strong>Time:</strong> $(date)</p>
-              </div>
-              <p style="margin-top: 20px;">Thank you for the support! This helps maintain and improve your open source projects. 💜</p>
-            </div>
-
       - name: 📱 Send Telegram Notification
         if: steps.check-sponsors.outputs.new_sponsors == 'true' && secrets.TELEGRAM_BOT_TOKEN != ''
         run: |
@@ -159,10 +117,9 @@ jobs:
             done
           fi
           
-          # Tier 2: $25+ - VIP Discord role (if Discord bot is configured)
+          # Tier 2: $25+ - VIP sponsor detected
           if (( $(echo "$tier_amount >= 25" | bc -l) )); then
             echo "🌟 VIP sponsor detected: $sponsor"
-            # You can add Discord role assignment here if you have a Discord bot
           fi
 
       - name: 📊 Update Sponsor Stats
