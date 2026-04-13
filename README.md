@@ -1,17 +1,16 @@
-# George Pricop · @Gzeu
+![Header](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=220&section=header&text=George%20Pricop&fontColor=ffffff&fontSize=50&animation=fadeIn&desc=Blockchain%20%7C%20AI%20Agents%20%7C%20Web3%20%7C%20GameFi&descSize=18&descAlignY=75)
 
 <div align="center">
 
-![Header](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=220&section=header&text=George%20Pricop&fontColor=ffffff&fontSize=50&animation=fadeIn&desc=Blockchain%20Developer%20%7C%20AI%20Automation%20Specialist%20%7C%20Builder&descSize=18&descAlignY=75)
+[![MultiversX](https://img.shields.io/badge/MultiversX-Smart%20Contracts-23AC6F?style=for-the-badge)](https://multiversx.com)
+[![Rust](https://img.shields.io/badge/Rust-Blockchain-000000?style=for-the-badge&logo=rust&logoColor=white)](https://github.com/Gzeu)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Full--Stack-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://github.com/Gzeu)
+[![AI Agents](https://img.shields.io/badge/AI-Agent%20Developer-FF6B6B?style=for-the-badge&logo=openai&logoColor=white)](https://github.com/Gzeu)
+[![Open to Work](https://img.shields.io/badge/%F0%9F%9F%A2%20Open%20to-Remote%20%2F%20EU%20Roles-brightgreen?style=for-the-badge)](https://linkedin.com/in/george-pricop)
 
-[![MultiversX](https://img.shields.io/badge/MultiversX-Blockchain-23AC6F?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgo=)](https://multiversx.com)
-[![AI Automation](https://img.shields.io/badge/AI-Automation-FF6B6B?style=for-the-badge&logo=openai&logoColor=white)](https://github.com/Gzeu)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Expert-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://github.com/Gzeu)
-[![Next.js](https://img.shields.io/badge/Next.js-Full--Stack-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://github.com/Gzeu)
-[![Location](https://img.shields.io/badge/📍-Bucharest%2C%20Romania-CE1126?style=for-the-badge)](https://github.com/Gzeu)
-
-[![GitHub followers](https://img.shields.io/github/followers/Gzeu?style=social)](https://github.com/Gzeu)
-[![Repos](https://img.shields.io/badge/Public%20Repos-126-blue?style=flat-square)](https://github.com/Gzeu?tab=repositories)
+[![GitHub followers](https://img.shields.io/github/followers/Gzeu?style=social)](https://github.com/Gzeu?tab=followers)
+[![Repos](https://img.shields.io/badge/Public%20Repos-150+-blue?style=flat-square)](https://github.com/Gzeu?tab=repositories)
+[![Contributions](https://img.shields.io/badge/Contributions%20(12mo)-4300+-orange?style=flat-square)](https://github.com/Gzeu)
 
 </div>
 
@@ -19,66 +18,30 @@
 
 ## 🧠 About Me
 
-> *Building at the intersection of Blockchain, AI, and Game Development*
+> *Building at the intersection of Blockchain, AI Agents, and GameFi.*
 
-I'm an independent full-stack developer and entrepreneur from Bucharest, Romania, specializing in:
+Independent developer from **Bucharest, Romania** — specializing in production-grade Web3 systems, autonomous AI agents, and GameFi platforms.
 
-- ⛓️ **Blockchain / Web3** — Smart contracts, DApps, tokenomics on **MultiversX (EGLD)**
-- 🤖 **AI Agents & Automation** — LLM-powered agents, trading bots, workflow automation
-- 🎮 **Game Development** — GameFi mechanics, NFT-integrated games, Godot/Canvas
-- 🌐 **Full-Stack SaaS** — Rapid MVP development with Next.js, TypeScript & Python
-- ☁️ **Cloud & DevOps** — GCP, Vercel, Docker, CI/CD pipelines
+- ⛓️ **Blockchain / Web3** — Rust smart contracts, DeFi protocols, agentic on-chain commerce on **MultiversX (Supernova)**
+- 🤖 **AI Agents** — Multi-agent orchestration, LLM-powered workflows, AI task escrow, on-chain agent economies
+- 🎮 **GameFi** — Play-to-earn platforms, NFT game mechanics, procedural world generation
+- 🌐 **Full-Stack dApps** — Next.js 14, TypeScript, NestJS, xPortal, GCP & Vercel
+- 🔐 **Security** — AES-256-GCM cryptographic tooling, audit logs, secure DevOps
 
 ---
 
 ## 🚀 Featured Projects
 
-<table>
-<tr>
-<td width="50%">
-
-### 💹 [CryptoTraderPro](https://github.com/Gzeu/profesorXtrader)
-**Professional Binance Trading Dashboard**
-- Real-time portfolio monitoring
-- AI-powered market analysis & signals
-- **Stack:** TypeScript · Next.js · Binance API
-- **Status:** 🟢 Production Ready
-
-</td>
-<td width="50%">
-
-### 🎮 [Dungeon Legends](https://github.com/Gzeu/dungeon-legends)
-**Blockchain GameFi Application**
-- GameFi mechanics on MultiversX
-- NFT-based gameplay & progression
-- **Stack:** TypeScript · Smart Contracts · Godot
-- **Status:** 🟡 Active Development
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-### 🌳 [CarbonFlow AI](https://github.com/Gzeu/carbonflow-ai)
-**Decentralized Carbon Credit Trading**
-- ML verification algorithms
-- Blockchain-automated settlements
-- **Stack:** Python · AI/ML · MultiversX
-- **Status:** 🟡 Beta Testing
-
-</td>
-<td width="50%">
-
-### 🏛️ [Guildmaster.io](https://github.com/Gzeu/guildmaster-io)
-**Web3 Guild Management Platform**
-- DAO coordination & community tools
-- On-chain governance mechanics
-- **Stack:** TypeScript · Smart Contracts
-- **Status:** 🟢 Production Ready
-
-</td>
-</tr>
-</table>
+| Project | Description | Stack | Status |
+|---|---|---|---|
+| [🏪 agentbazaar](https://github.com/Gzeu/agentbazaar) | Permissionless AI agent marketplace on MultiversX Supernova — agent-to-agent on-chain negotiation & execution | TypeScript · Rust · MultiversX | 🟢 Active |
+| [🤝 ai-task-escrow-router](https://github.com/Gzeu/ai-task-escrow-router) | End-to-end escrow & settlement protocol for AI-mediated task execution | Rust · MultiversX | 🟢 Active |
+| [🛒 mx-agentic-commerce](https://github.com/Gzeu/mx-agentic-commerce) | Gamified agentic commerce (UCP/ACP/x402/MCP/AP2) with Rust smart contracts & xPortal | TypeScript · Rust | 🟢 Active |
+| [🤖 openclaw-hub](https://github.com/Gzeu/openclaw-hub) | Centralized AI agent discovery, economy & skill execution hub | TypeScript | 🟡 In Progress |
+| [🏰 guildmaster-io](https://github.com/Gzeu/guildmaster-io) | AI-powered DeFi intelligence & staking optimizer on GCP | TypeScript · Rust · GCP | 🟢 Production |
+| [⚔️ crypto-arena](https://github.com/Gzeu/crypto-arena) | Autonomous multi-agent crypto trading simulation with on-chain leaderboard | Python · Base L2 | 🟡 Beta |
+| [🔐 vaultkey](https://github.com/Gzeu/vaultkey) | AES-256-GCM encrypted API key wallet — CLI + TUI + GUI, Argon2id, audit logs | Python | 🟢 Production |
+| [🎮 roblox-procedural-worlds](https://github.com/Gzeu/roblox-procedural-worlds) | Procedural world gen for Roblox — biomes, terrain, chunk-based (Luau) | Lua | 🟢 Active |
 
 ---
 
@@ -88,29 +51,33 @@ I'm an independent full-stack developer and entrepreneur from Bucharest, Romania
 
 **Languages**
 
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Rust](https://img.shields.io/badge/Rust-000000?style=flat-square&logo=rust&logoColor=white)
-![C%23](https://img.shields.io/badge/C%23-239120?style=flat-square&logo=csharp&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Lua](https://img.shields.io/badge/Lua-2C2D72?style=flat-square&logo=lua&logoColor=white)
+![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 
-**Frameworks & Tools**
+**Blockchain & Web3**
+
+![MultiversX](https://img.shields.io/badge/MultiversX-23AC6F?style=flat-square)
+![Smart Contracts](https://img.shields.io/badge/Smart%20Contracts-Rust-000000?style=flat-square&logo=rust)
+![DeFi](https://img.shields.io/badge/DeFi-Protocol%20Design-blueviolet?style=flat-square)
+![NFT](https://img.shields.io/badge/NFT-GameFi-FF6B6B?style=flat-square)
+
+**AI & Agents**
+
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-FF6B6B?style=flat-square)
+![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Systems-orange?style=flat-square)
+
+**Full-Stack & DevOps**
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
-![Godot](https://img.shields.io/badge/Godot-478CBF?style=flat-square&logo=godotengine&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
-
-**Blockchain & AI**
-
-![MultiversX](https://img.shields.io/badge/MultiversX-23AC6F?style=flat-square)
-![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=openai&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-FF6B6B?style=flat-square)
-
-**Cloud & Infra**
-
-![GCP](https://img.shields.io/badge/Google%20Cloud-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
+![GCP](https://img.shields.io/badge/GCP-4285F4?style=flat-square&logo=googlecloud&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
 
 </div>
@@ -130,25 +97,23 @@ I'm an independent full-stack developer and entrepreneur from Bucharest, Romania
 
 ---
 
-## 🌐 What I'm Building Now
+## 🟢 Open to Work
 
-- 🤖 **AI Agent Platform** — Autonomous agents for business automation (OpenClaw / Moltbook)
-- ⚔️ **GameFi ecosystem** — NFT game with MultiversX integration
-- 📈 **Trading tools** — AI-powered crypto trading dashboards
-- 🧩 **SaaS MVPs** — Rapid prototyping across 15+ concurrent projects
+Actively looking for **Remote or EU-based** opportunities:
 
----
+| Role | Type |
+|---|---|
+| Blockchain Developer | Full-time / Contract |
+| MultiversX Smart Contract Developer | Full-time / Contract |
+| Web3 Engineer | Full-time / Contract |
+| AI Agent Developer | Full-time / Contract |
+| GameFi Developer | Full-time / Contract |
+| Rust Developer | Full-time / Contract |
 
-## 🤝 Connect & Collaborate
+📍 Bucharest, Romania · 🌍 Remote-first preferred · ✈️ Open to relocation (EU)
 
-<div align="center">
-
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/george-pricop)
 [![GitHub](https://img.shields.io/badge/GitHub-@Gzeu-181717?style=for-the-badge&logo=github)](https://github.com/Gzeu)
-[![MultiversX](https://img.shields.io/badge/MultiversX-Developer-23AC6F?style=for-the-badge)](https://multiversx.com)
-
-*Open to collaboration on Blockchain, AI, and GameFi projects.*
-
-</div>
 
 ---
 
