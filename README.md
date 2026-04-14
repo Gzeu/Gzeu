@@ -88,8 +88,8 @@ Independent developer from **Bucharest, Romania** — specializing in production
 
 <div align="center">
 
-  <img height="170" src="./assets/stats.svg" />
-  <img height="170" src="./assets/top-langs.svg" />
+    <img height="170" src="https://raw.githubusercontent.com/Gzeu/Gzeu/main/assets/stats.svg" />
+    <img height="170" src="https://raw.githubusercontent.com/Gzeu/Gzeu/main/assets/top-langs.svg" />
 
 ![GitHub Streak](https://streak-stats.demolab.com?user=Gzeu&theme=tokyonight&hide_border=true)
 
