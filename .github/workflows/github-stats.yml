@@ -22,30 +22,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const path = require('path');
             const fs = require('fs');
+            const workspace = process.env.GITHUB_WORKSPACE || '.';
+            const assetsDir = path.join(workspace, 'assets');
+            if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
 
             const username = 'Gzeu';
-
-            const query = `
-              query {
-                user(login: "${username}") {
-                  contributionsCollection {
-                    totalCommitContributions
-                    totalPullRequestContributions
-                    totalIssueContributions
-                    restrictedContributionsCount
-                  }
-                  repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
-                    nodes {
-                      stargazerCount
-                      primaryLanguage { name color }
-                    }
-                    totalCount
-                  }
-                  followers { totalCount }
-                }
-              }
-            `;
+            const query = `query { user(login: "${username}") { contributionsCollection { totalCommitContributions totalPullRequestContributions totalIssueContributions restrictedContributionsCount } repositories(first: 100, ownerAffiliations: OWNER, isFork: false) { nodes { stargazerCount primaryLanguage { name color } } totalCount } followers { totalCount } } }`;
 
             const result = await github.graphql(query);
             const user = result.user;
@@ -57,12 +41,13 @@ jobs:
             const totalStars = user.repositories.nodes.reduce((a, r) => a + r.stargazerCount, 0);
             const year = new Date().getFullYear();
 
-            // Count languages
+            console.log('Stats:', { totalCommits, totalPRs, totalIssues, totalRepos, totalStars });
+
             const langMap = {};
             user.repositories.nodes.forEach(r => {
               if (r.primaryLanguage) {
                 const n = r.primaryLanguage.name;
-                const c = r.primaryLanguage.color || '#888';
+                const c = r.primaryLanguage.color || '#888888';
                 if (!langMap[n]) langMap[n] = { count: 0, color: c };
                 langMap[n].count++;
               }
@@ -73,51 +58,56 @@ jobs:
               .slice(0, 8)
               .map(([name, { count, color }]) => ({ name, percent: ((count / totalLR) * 100).toFixed(1), color }));
 
-            // Stats SVG
-            const statsSvg = [
-              '<svg xmlns="http://www.w3.org/2000/svg" width="495" height="195" viewBox="0 0 495 195">',
-              '<style>text{font-family:"Segoe UI",Ubuntu,sans-serif}.lb{fill:#8b949e;font-size:13px}.vl{fill:#c9d1d9;font-size:13px;font-weight:600}.ti{fill:#58a6ff;font-size:17px;font-weight:700}</style>',
-              '<rect x="0.5" y="0.5" rx="4.5" width="494" height="194" fill="#1a1b27" stroke="#444"/>',
-              '<text x="25" y="35" class="ti">Gzeu&#39;s GitHub Stats</text>',
-              '<text x="25" y="80" class="lb">&#11088; Total Stars Earned:</text><text x="295" y="80" class="vl">' + totalStars + '</text>',
-              '<text x="25" y="105" class="lb">&#128230; Total Commits (' + year + '):</text><text x="295" y="105" class="vl">' + totalCommits + '</text>',
-              '<text x="25" y="130" class="lb">&#128257; Total PRs:</text><text x="295" y="130" class="vl">' + totalPRs + '</text>',
-              '<text x="25" y="155" class="lb">&#128027; Total Issues:</text><text x="295" y="155" class="vl">' + totalIssues + '</text>',
-              '<text x="25" y="180" class="lb">&#128193; Public Repos:</text><text x="295" y="180" class="vl">' + totalRepos + '</text>',
-              '</svg>'
-            ].join('');
+            console.log('Top langs:', topLangs.map(l => l.name + ' ' + l.percent + '%'));
 
-            // Top Langs SVG
+            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+            const statsLines = [
+              '<svg xmlns="http://www.w3.org/2000/svg" width="495" height="195" viewBox="0 0 495 195">',
+              '<style>text{font-family:Arial,sans-serif;fill:#c9d1d9}.lb{fill:#8b949e;font-size:13px}.vl{fill:#c9d1d9;font-size:13px;font-weight:bold}.ti{fill:#58a6ff;font-size:16px;font-weight:bold}</style>',
+              '<rect x="1" y="1" rx="4" width="493" height="193" fill="#0d1117" stroke="#30363d"/>',
+              '<text x="25" y="38" class="ti">' + esc("Gzeu's GitHub Stats") + '</text>',
+              '<text x="25" y="82" class="lb">Stars Earned:</text><text x="240" y="82" class="vl">' + esc(totalStars) + '</text>',
+              '<text x="25" y="107" class="lb">Commits (' + esc(year) + '):</text><text x="240" y="107" class="vl">' + esc(totalCommits) + '</text>',
+              '<text x="25" y="132" class="lb">Pull Requests:</text><text x="240" y="132" class="vl">' + esc(totalPRs) + '</text>',
+              '<text x="25" y="157" class="lb">Issues:</text><text x="240" y="157" class="vl">' + esc(totalIssues) + '</text>',
+              '<text x="25" y="182" class="lb">Public Repos:</text><text x="240" y="182" class="vl">' + esc(totalRepos) + '</text>',
+              '</svg>'
+            ];
+
+            const statsSvg = statsLines.join('\n');
+            fs.writeFileSync(path.join(assetsDir, 'stats.svg'), statsSvg);
+            console.log('stats.svg written');
+
             const barW = 415;
             let xOff = 0;
             const bars = topLangs.map(l => {
-              const w = Math.max(1, Math.round((parseFloat(l.percent) / 100) * barW));
-              const bar = '<rect x="' + xOff + '" y="0" width="' + w + '" height="8" rx="3" fill="' + l.color + '"/>';
+              const w = Math.max(2, Math.round((parseFloat(l.percent) / 100) * barW));
+              const s = '<rect x="' + xOff + '" y="0" width="' + w + '" height="8" rx="3" fill="' + esc(l.color) + '"/>';
               xOff += w;
-              return bar;
+              return s;
             }).join('');
 
             const legendItems = topLangs.map((l, i) => {
               const col = i % 2;
               const row = Math.floor(i / 2);
-              return '<g transform="translate(' + (col * 210) + ',' + (row * 25) + ')"><circle cx="5" cy="5" r="5" fill="' + l.color + '"/><text x="18" y="10" class="lb">' + l.name + ' ' + l.percent + '%</text></g>';
+              return '<g transform="translate(' + (col * 210 + 15) + ',' + (row * 25) + ')"><circle cx="6" cy="6" r="6" fill="' + esc(l.color) + '"/><text x="20" y="11" class="lb">' + esc(l.name) + ' ' + esc(l.percent) + '%</text></g>';
             }).join('');
 
             const langH = 90 + Math.ceil(topLangs.length / 2) * 25;
-            const langsSvg = [
+            const langsLines = [
               '<svg xmlns="http://www.w3.org/2000/svg" width="445" height="' + langH + '" viewBox="0 0 445 ' + langH + '">',
-              '<style>text{font-family:"Segoe UI",Ubuntu,sans-serif}.lb{fill:#8b949e;font-size:12px}.ti{fill:#58a6ff;font-size:17px;font-weight:700}</style>',
-              '<rect x="0.5" y="0.5" rx="4.5" width="444" height="' + (langH - 1) + '" fill="#1a1b27" stroke="#444"/>',
+              '<style>text{font-family:Arial,sans-serif;fill:#c9d1d9}.lb{fill:#8b949e;font-size:12px}.ti{fill:#58a6ff;font-size:16px;font-weight:bold}</style>',
+              '<rect x="1" y="1" rx="4" width="443" height="' + (langH - 2) + '" fill="#0d1117" stroke="#30363d"/>',
               '<text x="25" y="35" class="ti">Most Used Languages</text>',
               '<g transform="translate(15,55)">' + bars + '</g>',
-              '<g transform="translate(15,75)">' + legendItems + '</g>',
+              '<g transform="translate(0,75)">' + legendItems + '</g>',
               '</svg>'
-            ].join('');
+            ];
 
-            if (!require('fs').existsSync('assets')) require('fs').mkdirSync('assets');
-            fs.writeFileSync('assets/stats.svg', statsSvg);
-            fs.writeFileSync('assets/top-langs.svg', langsSvg);
-            console.log('SVGs generated successfully');
+            const langsSvg = langsLines.join('\n');
+            fs.writeFileSync(path.join(assetsDir, 'top-langs.svg'), langsSvg);
+            console.log('top-langs.svg written');
 
       - name: Commit and push
         run: |
