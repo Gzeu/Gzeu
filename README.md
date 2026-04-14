@@ -84,19 +84,6 @@ Independent developer from **Bucharest, Romania** — specializing in production
 
 ---
 
-## 📊 GitHub Stats
-
-<div align="center">
-
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=Gzeu&show_icons=true&theme=tokyonight&hide_border=true&count_private=true)
-![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=Gzeu&layout=compact&theme=tokyonight&hide_border=true)
-
-![GitHub Streak](https://streak-stats.demolab.com?user=Gzeu&theme=tokyonight&hide_border=true)
-
-</div>
-
----
-
 ## 🟢 Open to Work
 
 Actively looking for **Remote or EU-based** opportunities:
