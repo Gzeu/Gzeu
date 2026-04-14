@@ -17,33 +17,155 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y librsvg2-bin
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Fetch and convert stats
+      - name: Generate Stats with GitHub API
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p assets
+          node << 'EOF'
+          const https = require('https');
+          const fs = require('fs');
 
-          STATS_URL="https://github-readme-stats.vercel.app/api?username=Gzeu&show_icons=true&theme=tokyonight&hide_border=true&count_private=true"
-          LANGS_URL="https://github-readme-stats.vercel.app/api/top-langs/?username=Gzeu&layout=compact&theme=tokyonight&hide_border=true&langs_count=8"
+          const token = process.env.GITHUB_TOKEN;
+          const username = 'Gzeu';
 
-          # Fetch SVGs
-          curl -sL "$STATS_URL" -o assets/stats.svg || echo "Failed to fetch stats"
-          curl -sL "$LANGS_URL" -o assets/top-langs.svg || echo "Failed to fetch langs"
+          function graphql(query) {
+            return new Promise((resolve, reject) => {
+              const data = JSON.stringify({ query });
+              const options = {
+                hostname: 'api.github.com',
+                path: '/graphql',
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'github-stats-action',
+                  'Content-Length': Buffer.byteLength(data)
+                }
+              };
+              const req = https.request(options, (res) => {
+                let body = '';
+                res.on('data', chunk => body += chunk);
+                res.on('end', () => resolve(JSON.parse(body)));
+              });
+              req.on('error', reject);
+              req.write(data);
+              req.end();
+            });
+          }
 
-          # Convert SVG to PNG using rsvg-convert
-          if [ -f assets/stats.svg ]; then
-            rsvg-convert -w 500 assets/stats.svg -o assets/stats.png && echo "Stats PNG created" || echo "Failed to convert stats"
-          fi
-          if [ -f assets/top-langs.svg ]; then
-            rsvg-convert -w 380 assets/top-langs.svg -o assets/top-langs.png && echo "Langs PNG created" || echo "Failed to convert langs"
-          fi
+          async function main() {
+            const result = await graphql(`{
+              user(login: "${username}") {
+                name
+                contributionsCollection {
+                  totalCommitContributions
+                  totalPullRequestContributions
+                  totalIssueContributions
+                  totalRepositoryContributions
+                  restrictedContributionsCount
+                }
+                repositories(first: 100, ownerAffiliations: OWNER, isFork: false) {
+                  nodes {
+                    stargazerCount
+                    primaryLanguage { name color }
+                  }
+                  totalCount
+                }
+                followers { totalCount }
+              }
+            }`);
+
+            const user = result.data.user;
+            const cc = user.contributionsCollection;
+            const totalCommits = cc.totalCommitContributions + cc.restrictedContributionsCount;
+            const totalPRs = cc.totalPullRequestContributions;
+            const totalIssues = cc.totalIssueContributions;
+            const totalRepos = user.repositories.totalCount;
+            const totalStars = user.repositories.nodes.reduce((a, r) => a + r.stargazerCount, 0);
+            const followers = user.followers.totalCount;
+
+            // Count languages
+            const langMap = {};
+            user.repositories.nodes.forEach(r => {
+              if (r.primaryLanguage) {
+                const name = r.primaryLanguage.name;
+                const color = r.primaryLanguage.color;
+                langMap[name] = langMap[name] || { count: 0, color };
+                langMap[name].count++;
+              }
+            });
+            const totalLangRepos = Object.values(langMap).reduce((a, v) => a + v.count, 0);
+            const topLangs = Object.entries(langMap)
+              .sort((a, b) => b[1].count - a[1].count)
+              .slice(0, 8)
+              .map(([name, { count, color }]) => ({
+                name,
+                percent: ((count / totalLangRepos) * 100).toFixed(1),
+                color: color || '#888'
+              }));
+
+            // Generate Stats SVG
+            const statsSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="495" height="195" viewBox="0 0 495 195">
+  <style>text { font-family: 'Segoe UI', Ubuntu, Sans-Serif; fill: #c9d1d9; } .label { fill: #8b949e; font-size: 13px; } .value { fill: #c9d1d9; font-size: 13px; font-weight: 600; } .title { fill: #58a6ff; font-size: 17px; font-weight: 700; } .icon { fill: #79c0ff; }</style>
+  <rect x="0.5" y="0.5" rx="4.5" width="494" height="194" fill="#1a1b27" stroke="#1a1b27"/>
+  <text x="25" y="35" class="title">Gzeu's GitHub Stats</text>
+  <g transform="translate(0, 55)">
+    <text x="25" y="0" class="label">⭐ Total Stars Earned:</text><text x="300" y="0" class="value">${totalStars}</text>
+    <text x="25" y="30" class="label">📦 Total Commits (${new Date().getFullYear()}):</text><text x="300" y="30" class="value">${totalCommits}</text>
+    <text x="25" y="60" class="label">🔀 Total PRs:</text><text x="300" y="60" class="value">${totalPRs}</text>
+    <text x="25" y="90" class="label">🐛 Total Issues:</text><text x="300" y="90" class="value">${totalIssues}</text>
+    <text x="25" y="120" class="label">📁 Contributed to (repos):</text><text x="300" y="120" class="value">${totalRepos}</text>
+  </g>
+</svg>`;
+
+            fs.writeFileSync('assets/stats.svg', statsSvg);
+            console.log('Stats SVG generated');
+
+            // Generate Top Langs SVG
+            const barWidth = 415;
+            let x = 0;
+            const bars = topLangs.map(l => {
+              const w = Math.round((parseFloat(l.percent) / 100) * barWidth);
+              const bar = `<rect x="${x}" y="0" width="${w}" height="8" rx="4" fill="${l.color}"/>`;
+              x += w;
+              return bar;
+            }).join('');
+
+            const legendItems = topLangs.map((l, i) => {
+              const col = i % 2;
+              const row = Math.floor(i / 2);
+              return `<g transform="translate(${col * 210}, ${row * 25})">
+                <circle cx="5" cy="5" r="5" fill="${l.color}"/>
+                <text x="18" y="10" class="label">${l.name} ${l.percent}%</text>
+              </g>`;
+            }).join('');
+
+            const langH = 80 + Math.ceil(topLangs.length / 2) * 25;
+            const langsSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="445" height="${langH}" viewBox="0 0 445 ${langH}">
+  <style>text { font-family: 'Segoe UI', Ubuntu, Sans-Serif; fill: #c9d1d9; } .label { fill: #8b949e; font-size: 12px; } .title { fill: #58a6ff; font-size: 17px; font-weight: 700; }</style>
+  <rect x="0.5" y="0.5" rx="4.5" width="444" height="${langH - 1}" fill="#1a1b27" stroke="#1a1b27"/>
+  <text x="25" y="35" class="title">Most Used Languages</text>
+  <g transform="translate(25, 55)">${bars}</g>
+  <g transform="translate(25, 75)">${legendItems}</g>
+</svg>`;
+
+            fs.writeFileSync('assets/top-langs.svg', langsSvg);
+            console.log('Top langs SVG generated');
+          }
+
+          main().catch(e => { console.error(e); process.exit(1); });
+          EOF
 
       - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add assets/ || true
+          git add assets/stats.svg assets/top-langs.svg || true
           git diff --staged --quiet || git commit -m "chore: update GitHub stats [skip ci]"
           git push || true
