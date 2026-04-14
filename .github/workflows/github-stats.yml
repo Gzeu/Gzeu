@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate Stats with GitHub API
+      - name: Generate Stats SVGs
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,86 +28,81 @@ jobs:
             const assetsDir = path.join(workspace, 'assets');
             if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
 
-            const username = 'Gzeu';
-            const query = `query { user(login: "${username}") { contributionsCollection { totalCommitContributions totalPullRequestContributions totalIssueContributions restrictedContributionsCount } repositories(first: 100, ownerAffiliations: OWNER, isFork: false) { nodes { stargazerCount primaryLanguage { name color } } totalCount } followers { totalCount } } }`;
+            const q = `query { user(login: "Gzeu") { contributionsCollection { totalCommitContributions totalPullRequestContributions totalIssueContributions restrictedContributionsCount } repositories(first: 100, ownerAffiliations: OWNER, isFork: false) { nodes { stargazerCount primaryLanguage { name color } } totalCount } } }`;
+            const data = await github.graphql(q);
+            const u = data.user;
+            const cc = u.contributionsCollection;
+            const commits = cc.totalCommitContributions + cc.restrictedContributionsCount;
+            const prs = cc.totalPullRequestContributions;
+            const issues = cc.totalIssueContributions;
+            const repos = u.repositories.totalCount;
+            const stars = u.repositories.nodes.reduce((a, r) => a + r.stargazerCount, 0);
+            const yr = new Date().getFullYear();
+            console.log({commits, prs, issues, repos, stars});
 
-            const result = await github.graphql(query);
-            const user = result.user;
-            const cc = user.contributionsCollection;
-            const totalCommits = cc.totalCommitContributions + cc.restrictedContributionsCount;
-            const totalPRs = cc.totalPullRequestContributions;
-            const totalIssues = cc.totalIssueContributions;
-            const totalRepos = user.repositories.totalCount;
-            const totalStars = user.repositories.nodes.reduce((a, r) => a + r.stargazerCount, 0);
-            const year = new Date().getFullYear();
-
-            console.log('Stats:', { totalCommits, totalPRs, totalIssues, totalRepos, totalStars });
-
-            const langMap = {};
-            user.repositories.nodes.forEach(r => {
+            const lm = {};
+            u.repositories.nodes.forEach(r => {
               if (r.primaryLanguage) {
                 const n = r.primaryLanguage.name;
                 const c = r.primaryLanguage.color || '#888888';
-                if (!langMap[n]) langMap[n] = { count: 0, color: c };
-                langMap[n].count++;
+                if (!lm[n]) lm[n] = {count:0, color:c};
+                lm[n].count++;
               }
             });
-            const totalLR = Object.values(langMap).reduce((a, v) => a + v.count, 0);
-            const topLangs = Object.entries(langMap)
-              .sort((a, b) => b[1].count - a[1].count)
-              .slice(0, 8)
-              .map(([name, { count, color }]) => ({ name, percent: ((count / totalLR) * 100).toFixed(1), color }));
+            const tot = Object.values(lm).reduce((a,v)=>a+v.count,0);
+            const langs = Object.entries(lm).sort((a,b)=>b[1].count-a[1].count).slice(0,8)
+              .map(([name,{count,color}])=>({name, pct:((count/tot)*100).toFixed(1), color}));
+            console.log('langs:', langs.map(l=>l.name+' '+l.pct+'%'));
 
-            console.log('Top langs:', topLangs.map(l => l.name + ' ' + l.percent + '%'));
+            const TF = 'font-family="Arial,sans-serif" font-size="13" fill="#c9d1d9"';
+            const LF = 'font-family="Arial,sans-serif" font-size="13" fill="#8b949e"';
+            const HF = 'font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#58a6ff"';
 
-            const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            const mkRow = (y, label, val) =>
+              '<text x="25" y="'+y+'" '+LF+'>'+label+'</text><text x="265" y="'+y+'" '+TF+' font-weight="bold">'+String(val)+'</text>';
 
-            const statsLines = [
-              '<svg xmlns="http://www.w3.org/2000/svg" width="495" height="195" viewBox="0 0 495 195">',
-              '<style>text{font-family:Arial,sans-serif;fill:#c9d1d9}.lb{fill:#8b949e;font-size:13px}.vl{fill:#c9d1d9;font-size:13px;font-weight:bold}.ti{fill:#58a6ff;font-size:16px;font-weight:bold}</style>',
-              '<rect x="1" y="1" rx="4" width="493" height="193" fill="#0d1117" stroke="#30363d"/>',
-              '<text x="25" y="38" class="ti">' + esc("Gzeu's GitHub Stats") + '</text>',
-              '<text x="25" y="82" class="lb">Stars Earned:</text><text x="240" y="82" class="vl">' + esc(totalStars) + '</text>',
-              '<text x="25" y="107" class="lb">Commits (' + esc(year) + '):</text><text x="240" y="107" class="vl">' + esc(totalCommits) + '</text>',
-              '<text x="25" y="132" class="lb">Pull Requests:</text><text x="240" y="132" class="vl">' + esc(totalPRs) + '</text>',
-              '<text x="25" y="157" class="lb">Issues:</text><text x="240" y="157" class="vl">' + esc(totalIssues) + '</text>',
-              '<text x="25" y="182" class="lb">Public Repos:</text><text x="240" y="182" class="vl">' + esc(totalRepos) + '</text>',
-              '</svg>'
-            ];
+            const statsSvg = '<?xml version="1.0" encoding="UTF-8"?>' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="495" height="200" viewBox="0 0 495 200">' +
+              '<rect width="495" height="200" rx="6" fill="#0d1117"/>' +
+              '<text x="25" y="40" '+HF+'>Gzeu GitHub Stats</text>' +
+              mkRow(85, 'Stars Earned:', stars) +
+              mkRow(110, 'Commits ('+yr+'):', commits) +
+              mkRow(135, 'Pull Requests:', prs) +
+              mkRow(160, 'Issues:', issues) +
+              mkRow(185, 'Public Repos:', repos) +
+              '</svg>';
 
-            const statsSvg = statsLines.join('\n');
-            fs.writeFileSync(path.join(assetsDir, 'stats.svg'), statsSvg);
-            console.log('stats.svg written');
+            fs.writeFileSync(path.join(assetsDir,'stats.svg'), statsSvg, 'utf8');
+            console.log('stats.svg ok, len='+statsSvg.length);
 
-            const barW = 415;
-            let xOff = 0;
-            const bars = topLangs.map(l => {
-              const w = Math.max(2, Math.round((parseFloat(l.percent) / 100) * barW));
-              const s = '<rect x="' + xOff + '" y="0" width="' + w + '" height="8" rx="3" fill="' + esc(l.color) + '"/>';
-              xOff += w;
+            const bw = 440;
+            let xo = 0;
+            const bars = langs.map(l=>{
+              const w = Math.max(1, Math.round((parseFloat(l.pct)/100)*bw));
+              const s = '<rect x="'+xo+'" y="0" width="'+w+'" height="8" rx="3" fill="'+l.color+'"/>';
+              xo+=w;
               return s;
             }).join('');
 
-            const legendItems = topLangs.map((l, i) => {
-              const col = i % 2;
-              const row = Math.floor(i / 2);
-              return '<g transform="translate(' + (col * 210 + 15) + ',' + (row * 25) + ')"><circle cx="6" cy="6" r="6" fill="' + esc(l.color) + '"/><text x="20" y="11" class="lb">' + esc(l.name) + ' ' + esc(l.percent) + '%</text></g>';
+            const LF2 = 'font-family="Arial,sans-serif" font-size="12" fill="#8b949e"';
+            const legend = langs.map((l,i)=>{
+              const cx = (i%2)*220+15;
+              const cy = Math.floor(i/2)*24;
+              return '<circle cx="'+(cx+5)+'" cy="'+(cy+77)+'" r="5" fill="'+l.color+'"/>'+
+                     '<text x="'+(cx+16)+'" y="'+(cy+82)+'" '+LF2+'>'+l.name+' '+l.pct+'%</text>';
             }).join('');
 
-            const langH = 90 + Math.ceil(topLangs.length / 2) * 25;
-            const langsLines = [
-              '<svg xmlns="http://www.w3.org/2000/svg" width="445" height="' + langH + '" viewBox="0 0 445 ' + langH + '">',
-              '<style>text{font-family:Arial,sans-serif;fill:#c9d1d9}.lb{fill:#8b949e;font-size:12px}.ti{fill:#58a6ff;font-size:16px;font-weight:bold}</style>',
-              '<rect x="1" y="1" rx="4" width="443" height="' + (langH - 2) + '" fill="#0d1117" stroke="#30363d"/>',
-              '<text x="25" y="35" class="ti">Most Used Languages</text>',
-              '<g transform="translate(15,55)">' + bars + '</g>',
-              '<g transform="translate(0,75)">' + legendItems + '</g>',
-              '</svg>'
-            ];
+            const lh = 72 + Math.ceil(langs.length/2)*24 + 10;
+            const langsSvg = '<?xml version="1.0" encoding="UTF-8"?>' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="470" height="'+lh+'" viewBox="0 0 470 '+lh+'">' +
+              '<rect width="470" height="'+lh+'" rx="6" fill="#0d1117"/>' +
+              '<text x="20" y="35" '+HF+'>Most Used Languages</text>' +
+              '<g transform="translate(15,55)">'+bars+'</g>' +
+              legend +
+              '</svg>';
 
-            const langsSvg = langsLines.join('\n');
-            fs.writeFileSync(path.join(assetsDir, 'top-langs.svg'), langsSvg);
-            console.log('top-langs.svg written');
+            fs.writeFileSync(path.join(assetsDir,'top-langs.svg'), langsSvg, 'utf8');
+            console.log('top-langs.svg ok, len='+langsSvg.length);
 
       - name: Commit and push
         run: |
