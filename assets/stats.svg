@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="495" height="195" viewBox="0 0 495 195">
-<style>text{font-family:Arial,sans-serif;fill:#c9d1d9}.lb{fill:#8b949e;font-size:13px}.vl{fill:#c9d1d9;font-size:13px;font-weight:bold}.ti{fill:#58a6ff;font-size:16px;font-weight:bold}</style>
-<rect x="1" y="1" rx="4" width="493" height="193" fill="#0d1117" stroke="#30363d"/>
-<text x="25" y="38" class="ti">Gzeu's GitHub Stats</text>
-<text x="25" y="82" class="lb">Stars Earned:</text><text x="240" y="82" class="vl">4</text>
-<text x="25" y="107" class="lb">Commits (2026):</text><text x="240" y="107" class="vl">3850</text>
-<text x="25" y="132" class="lb">Pull Requests:</text><text x="240" y="132" class="vl">85</text>
-<text x="25" y="157" class="lb">Issues:</text><text x="240" y="157" class="vl">100</text>
-<text x="25" y="182" class="lb">Public Repos:</text><text x="240" y="182" class="vl">132</text>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="495" height="200" viewBox="0 0 495 200"><rect width="495" height="200" rx="6" fill="#0d1117"/><text x="25" y="40" font-family="Arial,sans-serif" font-size="16" font-weight="bold" fill="#58a6ff">Gzeu GitHub Stats</text><text x="25" y="85" font-family="Arial,sans-serif" font-size="13" fill="#8b949e">Stars Earned:</text><text x="265" y="85" font-family="Arial,sans-serif" font-size="13" fill="#c9d1d9" font-weight="bold">4</text><text x="25" y="110" font-family="Arial,sans-serif" font-size="13" fill="#8b949e">Commits (2026):</text><text x="265" y="110" font-family="Arial,sans-serif" font-size="13" fill="#c9d1d9" font-weight="bold">3852</text><text x="25" y="135" font-family="Arial,sans-serif" font-size="13" fill="#8b949e">Pull Requests:</text><text x="265" y="135" font-family="Arial,sans-serif" font-size="13" fill="#c9d1d9" font-weight="bold">85</text><text x="25" y="160" font-family="Arial,sans-serif" font-size="13" fill="#8b949e">Issues:</text><text x="265" y="160" font-family="Arial,sans-serif" font-size="13" fill="#c9d1d9" font-weight="bold">100</text><text x="25" y="185" font-family="Arial,sans-serif" font-size="13" fill="#8b949e">Public Repos:</text><text x="265" y="185" font-family="Arial,sans-serif" font-size="13" fill="#c9d1d9" font-weight="bold">132</text></svg>
