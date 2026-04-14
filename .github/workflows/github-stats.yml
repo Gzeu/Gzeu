@@ -61,8 +61,7 @@ jobs:
             const mkRow = (y, label, val) =>
               '<text x="25" y="'+y+'" '+LF+'>'+label+'</text><text x="265" y="'+y+'" '+TF+' font-weight="bold">'+String(val)+'</text>';
 
-            const statsSvg = '<?xml version="1.0" encoding="UTF-8"?>' +
-              '<svg xmlns="http://www.w3.org/2000/svg" width="495" height="200" viewBox="0 0 495 200">' +
+            const statsSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="495" height="200" viewBox="0 0 495 200">' +
               '<rect width="495" height="200" rx="6" fill="#0d1117"/>' +
               '<text x="25" y="40" '+HF+'>Gzeu GitHub Stats</text>' +
               mkRow(85, 'Stars Earned:', stars) +
@@ -73,7 +72,7 @@ jobs:
               '</svg>';
 
             fs.writeFileSync(path.join(assetsDir,'stats.svg'), statsSvg, 'utf8');
-            console.log('stats.svg ok, len='+statsSvg.length);
+            console.log('stats.svg ok, first50='+statsSvg.substring(0,50));
 
             const bw = 440;
             let xo = 0;
@@ -93,8 +92,7 @@ jobs:
             }).join('');
 
             const lh = 72 + Math.ceil(langs.length/2)*24 + 10;
-            const langsSvg = '<?xml version="1.0" encoding="UTF-8"?>' +
-              '<svg xmlns="http://www.w3.org/2000/svg" width="470" height="'+lh+'" viewBox="0 0 470 '+lh+'">' +
+            const langsSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="470" height="'+lh+'" viewBox="0 0 470 '+lh+'">' +
               '<rect width="470" height="'+lh+'" rx="6" fill="#0d1117"/>' +
               '<text x="20" y="35" '+HF+'>Most Used Languages</text>' +
               '<g transform="translate(15,55)">'+bars+'</g>' +
@@ -102,7 +100,7 @@ jobs:
               '</svg>';
 
             fs.writeFileSync(path.join(assetsDir,'top-langs.svg'), langsSvg, 'utf8');
-            console.log('top-langs.svg ok, len='+langsSvg.length);
+            console.log('top-langs.svg ok, first50='+langsSvg.substring(0,50));
 
       - name: Commit and push
         run: |
