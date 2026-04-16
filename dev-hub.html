@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>George Pricop · Dev Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0d;--surface:#141414;--surface2:#1a1a1a;--surface3:#202020;
+  --border:#2a2a2a;--border2:#333;
+  --text:#e8e8e8;--muted:#888;--faint:#444;
+  --primary:#4f98a3;--primary-dim:#1e3b3e;
+  --accent:#6daa45;--orange:#fdab43;--purple:#a86fdf;
+  --red:#dd6974;--blue:#5591c7;
+  --font:'Geist',system-ui,sans-serif;
+  --mono:'Geist Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:18px;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s6:24px;--s8:32px;--s10:40px;--s12:48px;--s16:64px;
+}
+html{color-scheme:dark}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100dvh}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:var(--s6);position:sticky;top:0;height:100dvh;overflow-y:auto;display:flex;flex-direction:column;gap:var(--s6)}
+.main{display:flex;flex-direction:column;min-height:100dvh}
+
+.profile{display:flex;flex-direction:column;align-items:center;gap:var(--s3);text-align:center;padding-bottom:var(--s6);border-bottom:1px solid var(--border)}
+.avatar-ring{width:72px;height:72px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--primary),var(--purple));flex-shrink:0}
+.avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid var(--bg)}
+.profile-name{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.profile-bio{font-size:11px;color:var(--muted);line-height:1.45;max-width:200px}
+.profile-tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:2px}
+.tag{font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border2);color:var(--muted);padding:2px 7px;border-radius:var(--r-sm)}
+
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:var(--s2)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:var(--s3);padding:8px 10px;border-radius:var(--r-md);font-size:13px;color:var(--muted);transition:all 180ms;cursor:pointer;border:1px solid transparent}
+.nav-item svg{opacity:.6;flex-shrink:0}
+.nav-item:hover{background:var(--surface2);color:var(--text);border-color:var(--border)}
+.nav-item.active{background:var(--primary-dim);color:var(--primary);border-color:rgba(79,152,163,.25)}
+.nav-item.active svg{opacity:1}
+.nav-badge{margin-left:auto;font-size:10px;font-family:var(--mono);background:var(--surface3);border:1px solid var(--border2);padding:1px 6px;border-radius:var(--r-sm);color:var(--muted)}
+.nav-item.active .nav-badge{background:var(--primary-dim);border-color:rgba(79,152,163,.3);color:var(--primary)}
+
+.stats-mini{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.stat-mini{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s3);text-align:center}
+.stat-mini-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.stat-mini-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+.theme-btn{display:flex;align-items:center;gap:var(--s2);padding:8px 10px;border-radius:var(--r-md);font-size:12px;color:var(--muted);border:1px solid var(--border);transition:all 180ms;margin-top:auto}
+.theme-btn:hover{background:var(--surface2);color:var(--text)}
+
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:var(--s4) var(--s8);display:flex;align-items:center;gap:var(--s4);position:sticky;top:0;z-index:10}
+.topbar-title{font-size:14px;font-weight:600;flex:1}
+.search-wrap{position:relative;flex:1;max-width:380px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-md);padding:7px 12px 7px 34px;font-size:13px;color:var(--text);font-family:var(--font);transition:border-color 180ms}
+.search::placeholder{color:var(--faint)}
+.search:focus{outline:none;border-color:var(--primary)}
+
+.filter-bar{padding:var(--s4) var(--s8);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;background:var(--surface)}
+.filter-chip{font-size:11px;font-family:var(--mono);padding:4px 10px;border-radius:var(--r-sm);border:1px solid var(--border2);color:var(--muted);transition:all 180ms;cursor:pointer}
+.filter-chip:hover{border-color:var(--primary);color:var(--primary)}
+.filter-chip.active{background:var(--primary-dim);border-color:rgba(79,152,163,.4);color:var(--primary)}
+.filter-lbl{font-size:11px;color:var(--faint);font-weight:600}
+.sort-select{font-size:11px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:4px 8px;color:var(--muted);margin-left:auto;cursor:pointer}
+.sort-select:focus{outline:none;border-color:var(--primary)}
+
+.content{padding:var(--s8);flex:1}
+.results-count{font-size:12px;color:var(--muted);margin-bottom:var(--s6);font-family:var(--mono)}
+.results-count span{color:var(--text);font-weight:600}
+
+.repo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--s4)}
+.repo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s3);transition:border-color 200ms,transform 200ms,box-shadow 200ms;cursor:pointer;position:relative;overflow:hidden}
+.repo-card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,152,163,.04),transparent);opacity:0;transition:opacity 200ms}
+.repo-card:hover{border-color:rgba(79,152,163,.5);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.repo-card:hover::before{opacity:1}
+.repo-header{display:flex;align-items:flex-start;gap:var(--s3)}
+.repo-icon{width:36px;height:36px;border-radius:var(--r-md);background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.repo-meta{flex:1;min-width:0}
+.repo-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.repo-name a{transition:color 180ms}
+.repo-card:hover .repo-name a{color:var(--primary)}
+.repo-fork-badge{font-size:9px;font-family:var(--mono);background:rgba(168,111,223,.15);border:1px solid rgba(168,111,223,.3);color:var(--purple);padding:1px 5px;border-radius:3px;display:inline-block;margin-left:6px;vertical-align:middle}
+.repo-desc{font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
+.repo-topics{display:flex;flex-wrap:wrap;gap:4px}
+.topic{font-size:10px;font-family:var(--mono);background:rgba(79,152,163,.1);border:1px solid rgba(79,152,163,.2);color:var(--primary);padding:2px 7px;border-radius:3px}
+.repo-footer{display:flex;align-items:center;gap:var(--s4);margin-top:auto;padding-top:var(--s3);border-top:1px solid var(--border)}
+.lang-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.lang-name{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.repo-stats{display:flex;align-items:center;gap:var(--s3);margin-left:auto}
+.repo-stat{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.repo-stat svg{opacity:.6}
+.repo-time{font-size:10px;color:var(--faint);font-family:var(--mono)}
+
+.empty{text-align:center;padding:var(--s16);color:var(--muted)}
+.empty svg{margin:0 auto var(--s4);opacity:.3}
+.empty h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:var(--s2)}
+.empty p{font-size:13px;max-width:36ch;margin:0 auto}
+
+.pagination{display:flex;align-items:center;gap:var(--s2);justify-content:center;margin-top:var(--s8)}
+.page-btn{font-size:12px;font-family:var(--mono);padding:6px 12px;border-radius:var(--r-sm);border:1px solid var(--border2);color:var(--muted);transition:all 180ms}
+.page-btn:hover{border-color:var(--primary);color:var(--primary)}
+.page-btn.active{background:var(--primary-dim);border-color:rgba(79,152,163,.4);color:var(--primary)}
+.page-btn:disabled{opacity:.3;cursor:not-allowed}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.vercel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:var(--s4)}
+.vercel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s3);transition:border-color 200ms,transform 200ms}
+.vercel-card:hover{border-color:rgba(79,152,163,.4);transform:translateY(-2px)}
+.vercel-card-header{display:flex;align-items:center;gap:var(--s3)}
+.vercel-logo{width:32px;height:32px;border-radius:var(--r-md);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vercel-project-name{font-size:14px;font-weight:600}
+.vercel-framework{font-size:10px;font-family:var(--mono);color:var(--muted)}
+.vercel-url{font-size:11px;font-family:var(--mono);color:var(--primary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 6px var(--accent)}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s4);margin-bottom:var(--s8)}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:var(--s6);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,var(--kpi-color,.1),transparent 60%);opacity:.06}
+.kpi-val{font-size:32px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:var(--kpi-color,var(--text))}
+.kpi-lbl{font-size:12px;color:var(--muted);margin-top:var(--s1)}
+.kpi-icon{position:absolute;top:var(--s4);right:var(--s4);opacity:.15;font-size:28px}
+.lang-bars{display:flex;flex-direction:column;gap:var(--s3)}
+.lang-bar-row{display:grid;grid-template-columns:100px 1fr 48px;align-items:center;gap:var(--s3)}
+.lang-bar-name{font-size:12px;font-family:var(--mono);color:var(--muted);text-align:right}
+.lang-bar-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.lang-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.16,1,.3,1)}
+.lang-bar-pct{font-size:11px;font-family:var(--mono);color:var(--faint)}
+.section-title{font-size:13px;font-weight:600;margin-bottom:var(--s4);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+.threads-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--s16);text-align:center;gap:var(--s4)}
+.pulse-ring{width:64px;height:64px;border-radius:50%;border:2px solid rgba(79,152,163,.3);display:flex;align-items:center;justify-content:center;animation:pulse-ring 2s ease-in-out infinite}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(79,152,163,.3)}50%{box-shadow:0 0 0 12px rgba(79,152,163,0)}}
+
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .content{padding:var(--s4)}
+  .topbar{padding:var(--s3) var(--s4)}
+  .filter-bar{padding:var(--s3) var(--s4)}
+}
+
+[data-theme="light"]{
+  --bg:#f7f6f2;--surface:#fff;--surface2:#f3f0ec;--surface3:#edeae5;
+  --border:#dcd9d5;--border2:#ccc;
+  --text:#28251d;--muted:#7a7974;--faint:#bab9b4;
+  --primary:#01696f;--primary-dim:#cedcd8;
+  color-scheme:light;
+}
+[data-theme="light"] .avatar{border-color:var(--bg)}
+[data-theme="light"] .vercel-logo{background:#000}
+[data-theme="light"] .vercel-logo svg{fill:#fff}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="profile">
+    <div class="avatar-ring">
+      <img class="avatar" src="https://avatars.githubusercontent.com/u/96602369?v=4" alt="George Pricop" width="72" height="72" loading="lazy">
+    </div>
+    <div>
+      <div class="profile-name">George Pricop</div>
+      <div style="font-size:11px;color:var(--primary);font-family:var(--mono);margin-top:2px">@Gzeu</div>
+    </div>
+    <div class="profile-bio">Blockchain Dev · MultiversX Smart Contracts · AI Agents · GameFi · Rust · TypeScript</div>
+    <div class="profile-tags">
+      <span class="tag">Rust</span><span class="tag">TypeScript</span><span class="tag">AI</span>
+      <span class="tag">GameFi</span><span class="tag">MultiversX</span>
+    </div>
+  </div>
+  <div>
+    <div class="nav-label">Navigare</div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="switchTab('repos',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+        Proiecte GitHub
+        <span class="nav-badge" id="nav-count">30</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('vercel',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 19.7h20L12 2z"/></svg>
+        Vercel
+        <span class="nav-badge">20</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('stats',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Statistici
+      </div>
+      <div class="nav-item" onclick="switchTab('threads',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Vercel Threads
+        <span class="nav-badge">0</span>
+      </div>
+    </nav>
+  </div>
+  <div>
+    <div class="nav-label">Profil rapid</div>
+    <div class="stats-mini">
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--primary)">141</div><div class="stat-mini-lbl">Public repos</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--purple)">14</div><div class="stat-mini-lbl">Private repos</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--orange)">1</div><div class="stat-mini-lbl">Followers</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent)">3</div><div class="stat-mini-lbl">Following</div></div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    Schimbă tema
+  </button>
+</aside>
+
+<main class="main">
+  <div id="tab-repos" class="tab-panel active">
+    <div class="topbar">
+      <div class="topbar-title">Proiecte GitHub</div>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search" type="search" id="search-input" placeholder="Caută repo-uri..." oninput="onSearch(this.value)">
+      </div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-lbl">Limbaj:</span>
+      <div id="lang-filters" style="display:flex;gap:4px;flex-wrap:wrap"></div>
+      <select class="sort-select" id="sort-select" onchange="onSort(this.value)">
+        <option value="updated">Actualizare</option>
+        <option value="stars">Stele</option>
+        <option value="name">Alfabetic</option>
+        <option value="forks">Forks</option>
+      </select>
+    </div>
+    <div class="content">
+      <div class="results-count" id="results-count"></div>
+      <div class="repo-grid" id="repo-grid"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <div id="tab-vercel" class="tab-panel">
+    <div class="topbar"><div class="topbar-title">Proiecte Vercel · gzeus-projects</div></div>
+    <div class="content"><div class="vercel-grid" id="vercel-grid"></div></div>
+  </div>
+
+  <div id="tab-stats" class="tab-panel">
+    <div class="topbar"><div class="topbar-title">Statistici</div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi" style="--kpi-color:var(--primary)"><div class="kpi-val" data-target="141" id="kpi-repos">0</div><div class="kpi-lbl">Public repos</div><div class="kpi-icon">📦</div></div>
+        <div class="kpi" style="--kpi-color:var(--orange)"><div class="kpi-val" data-target="8" id="kpi-stars">0</div><div class="kpi-lbl">Total stele reale</div><div class="kpi-icon">⭐</div></div>
+        <div class="kpi" style="--kpi-color:var(--purple)"><div class="kpi-val" data-target="14" id="kpi-private">0</div><div class="kpi-lbl">Repo-uri private</div><div class="kpi-icon">🔒</div></div>
+        <div class="kpi" style="--kpi-color:var(--accent)"><div class="kpi-val" data-target="20" id="kpi-vercel">0</div><div class="kpi-lbl">Proiecte Vercel</div><div class="kpi-icon">▲</div></div>
+      </div>
+      <div class="section-title">Distribuție limbaje (30 repo-uri recente)</div>
+      <div class="lang-bars" id="lang-bars"></div>
+    </div>
+  </div>
+
+  <div id="tab-threads" class="tab-panel">
+    <div class="topbar"><div class="topbar-title">Vercel Toolbar Threads</div></div>
+    <div class="content">
+      <div class="threads-empty">
+        <div class="pulse-ring">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:6px">Niciun thread activ</h3>
+          <p style="font-size:13px;color:var(--muted);max-width:36ch">Feedback-ul din Vercel Toolbar pe deployment-urile preview va apărea automat aici.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const REPOS=[
+  {name:"perchance-ai-prompt-library",desc:"A curated library of AI prompt templates for Perchance.org generators",lang:"JavaScript",stars:3,forks:0,issues:12,updated:"2025-10-12",topics:["ai","prompts","perchance"],fork:false},
+  {name:"clawtree",desc:"Visual dependency tree explorer for Rust crates",lang:"Rust",stars:1,forks:0,issues:3,updated:"2026-03-18",topics:["rust","cli","crates"],fork:false},
+  {name:"dungeonforge",desc:"Procedural dungeon generation engine for GameFi",lang:"Rust",stars:0,forks:0,issues:0,updated:"2026-04-10",topics:["gamefi","rust","procedural"],fork:false},
+  {name:"contentforge-ai",desc:"AI-powered content generation pipeline with multi-model support",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-04-14",topics:["ai","typescript","llm"],fork:false},
+  {name:"CelestialForge",desc:"MultiversX smart contract framework for GameFi projects",lang:"Rust",stars:0,forks:0,issues:0,updated:"2026-04-13",topics:["multiversx","smart-contracts","gamefi"],fork:false},
+  {name:"agentbazaar",desc:"Marketplace for AI agents and automation workflows",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-04-11",topics:["ai-agents","marketplace","typescript"],fork:false},
+  {name:"multi-agent-orchestration-mcp",desc:"Multi-agent orchestration via Model Context Protocol",lang:"TypeScript",stars:0,forks:0,issues:2,updated:"2026-04-09",topics:["mcp","ai","orchestration"],fork:false},
+  {name:"viralsafe-platform",desc:"Content moderation and safety platform",lang:"TypeScript",stars:0,forks:0,issues:1,updated:"2026-04-08",topics:["moderation","safety"],fork:false},
+  {name:"ai-smart-cleaner",desc:"AI-driven file and code cleanup automation",lang:"Python",stars:1,forks:0,issues:0,updated:"2026-04-05",topics:["ai","python","automation"],fork:false},
+  {name:"cosmicinsights",desc:"Astrology + AI daily insights platform",lang:"TypeScript",stars:1,forks:0,issues:0,updated:"2026-04-02",topics:["astrology","ai","typescript"],fork:false},
+  {name:"distrib-threads",desc:"Distributed thread management system",lang:"Rust",stars:0,forks:0,issues:0,updated:"2026-03-28",topics:["distributed","rust","threads"],fork:false},
+  {name:"mx-staking-dashboard",desc:"MultiversX staking dashboard with real-time APY",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-03-22",topics:["multiversx","staking","dashboard"],fork:false},
+  {name:"svelte-game-engine",desc:"Lightweight 2D game engine built with SvelteKit",lang:"Svelte",stars:0,forks:0,issues:0,updated:"2026-03-15",topics:["svelte","game-engine","2d"],fork:false},
+  {name:"lua-scripting-engine",desc:"Embedded Lua scripting for game logic",lang:"Lua",stars:0,forks:0,issues:0,updated:"2026-03-10",topics:["lua","scripting","gamefi"],fork:false},
+  {name:"nft-marketplace-mx",desc:"NFT marketplace on MultiversX blockchain",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-03-05",topics:["nft","multiversx","marketplace"],fork:false},
+  {name:"wasm-game-core",desc:"WebAssembly game core for high-performance browser games",lang:"Rust",stars:0,forks:0,issues:0,updated:"2026-02-28",topics:["wasm","rust","browser-game"],fork:false},
+  {name:"zig-network-lib",desc:"Low-level networking library written in Zig",lang:"Zig",stars:0,forks:0,issues:0,updated:"2026-02-20",topics:["zig","networking","low-level"],fork:false},
+  {name:"cpp-physics-engine",desc:"Custom physics engine for GameFi simulations",lang:"C++",stars:0,forks:0,issues:0,updated:"2026-02-15",topics:["cpp","physics","gamefi"],fork:false},
+  {name:"go-microservices",desc:"Microservices backbone written in Go",lang:"Go",stars:0,forks:0,issues:0,updated:"2026-02-10",topics:["go","microservices","backend"],fork:false},
+  {name:"elrond-sc-templates",desc:"Smart contract boilerplate templates for MultiversX",lang:"Rust",stars:0,forks:0,issues:0,updated:"2026-02-05",topics:["multiversx","rust","smart-contracts"],fork:false},
+  {name:"ai-trading-bot",desc:"Automated trading bot with AI signal processing",lang:"Python",stars:0,forks:0,issues:0,updated:"2026-01-30",topics:["trading","ai","python"],fork:false},
+  {name:"react-dashboard-kit",desc:"Reusable React dashboard component library",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-01-25",topics:["react","dashboard","typescript"],fork:false},
+  {name:"nuxt-cms-starter",desc:"Nuxt 3 + Directus CMS starter template",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-01-20",topics:["nuxt","cms","typescript"],fork:false},
+  {name:"astro-portfolio",desc:"Personal portfolio built with Astro + MDX",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-01-15",topics:["astro","portfolio"],fork:false},
+  {name:"remix-auth-starter",desc:"Full-stack Remix app with auth, DB and deploy config",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2026-01-10",topics:["remix","auth","typescript"],fork:false},
+  {name:"solidity-bridge",desc:"Cross-chain bridge smart contracts in Solidity",lang:"Solidity",stars:0,forks:0,issues:0,updated:"2025-12-28",topics:["solidity","bridge","defi"],fork:false},
+  {name:"rust-async-runtime",desc:"Minimal async runtime experiment in Rust",lang:"Rust",stars:0,forks:0,issues:0,updated:"2025-12-15",topics:["rust","async","runtime"],fork:false},
+  {name:"python-scraper-toolkit",desc:"Modular web scraping toolkit with proxy rotation",lang:"Python",stars:0,forks:0,issues:0,updated:"2025-11-30",topics:["python","scraping","automation"],fork:false},
+  {name:"three-js-world",desc:"3D interactive world experiment with Three.js",lang:"JavaScript",stars:0,forks:0,issues:0,updated:"2025-11-20",topics:["threejs","3d","javascript"],fork:false},
+  {name:"discord-bot-framework",desc:"Modular Discord bot framework with plugin system",lang:"TypeScript",stars:0,forks:0,issues:0,updated:"2025-11-10",topics:["discord","bot","typescript"],fork:false},
+];
+
+const VERCEL_PROJECTS=[
+  {name:"contentforge-ai",url:"contentforge-ai.vercel.app",framework:"Next.js"},
+  {name:"cosmicinsights",url:"cosmicinsights.vercel.app",framework:"Next.js"},
+  {name:"agentbazaar",url:"agentbazaar.vercel.app",framework:"Next.js"},
+  {name:"viralsafe-platform",url:"viralsafe-platform.vercel.app",framework:"Next.js"},
+  {name:"multi-agent-orchestration-mcp",url:"multi-agent-mcp.vercel.app",framework:"Next.js"},
+  {name:"mx-staking-dashboard",url:"mx-staking.vercel.app",framework:"Vite"},
+  {name:"react-dashboard-kit",url:"react-dashboard-kit.vercel.app",framework:"Vite"},
+  {name:"nuxt-cms-starter",url:"nuxt-cms-starter.vercel.app",framework:"Nuxt"},
+  {name:"astro-portfolio",url:"astro-portfolio-gzeu.vercel.app",framework:"Astro"},
+  {name:"remix-auth-starter",url:"remix-auth-starter.vercel.app",framework:"Remix"},
+  {name:"svelte-game-engine",url:"svelte-game-engine.vercel.app",framework:"SvelteKit"},
+  {name:"ai-smart-cleaner",url:"ai-smart-cleaner.vercel.app",framework:"Next.js"},
+  {name:"ai-trading-bot",url:"ai-trading-bot.vercel.app",framework:"Next.js"},
+  {name:"nft-marketplace-mx",url:"nft-marketplace-mx.vercel.app",framework:"Next.js"},
+  {name:"three-js-world",url:"three-js-world.vercel.app",framework:"Vite"},
+  {name:"discord-bot-framework",url:"discord-bot-framework.vercel.app",framework:"Next.js"},
+  {name:"distrib-threads",url:"distrib-threads.vercel.app",framework:"Next.js"},
+  {name:"CelestialForge",url:"celestialforge.vercel.app",framework:"Next.js"},
+  {name:"dungeonforge",url:"dungeonforge.vercel.app",framework:"Vite"},
+  {name:"python-scraper-toolkit",url:"python-scraper-toolkit.vercel.app",framework:"Next.js"},
+];
+
+const LANG_COLORS={TypeScript:"#3178c6",Rust:"#ce422b",Python:"#3572a5",JavaScript:"#f1e05a",Svelte:"#ff3e00",Lua:"#000080",Zig:"#f7a41d","C++":"#f34b7d",Go:"#00add8",Solidity:"#aa6746",Other:"#888"};
+function getLangColor(l){return LANG_COLORS[l]||LANG_COLORS.Other}
+function relTime(d){const diff=Math.floor((new Date()-new Date(d))/86400000);if(diff===0)return"azi";if(diff===1)return"ieri";if(diff<7)return diff+"z";if(diff<30)return Math.floor(diff/7)+"s";if(diff<365)return Math.floor(diff/30)+"l";return Math.floor(diff/365)+"a";}
+function getEmoji(n){n=n.toLowerCase();if(n.includes("game")||n.includes("dungeon"))return"🎮";if(n.includes("ai")||n.includes("agent"))return"🤖";if(n.includes("smart")||n.includes("contract")||n.includes("nft")||n.includes("blockchain")||n.includes("elrond")||n.includes("mx")||n.includes("multiversx"))return"⛓";if(n.includes("rust")||n.includes("wasm")||n.includes("zig"))return"⚙️";if(n.includes("bot"))return"🔧";if(n.includes("dashboard")||n.includes("cms"))return"📊";if(n.includes("market"))return"🏪";if(n.includes("three")||n.includes("world"))return"🌐";if(n.includes("thread")||n.includes("distrib"))return"🔀";return"📦";}
+
+let filtered=[...REPOS],activeLang="all",sortBy="updated",query="",page=1;
+const PER_PAGE=12;
+
+function applyFilters(){
+  filtered=REPOS.filter(r=>{
+    const q=query.toLowerCase();
+    const mQ=!q||r.name.toLowerCase().includes(q)||(r.desc||"").toLowerCase().includes(q)||(r.topics||[]).some(t=>t.includes(q));
+    const mL=activeLang==="all"||r.lang===activeLang;
+    return mQ&&mL;
+  });
+  if(sortBy==="stars")filtered.sort((a,b)=>b.stars-a.stars);
+  else if(sortBy==="name")filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sortBy==="forks")filtered.sort((a,b)=>b.forks-a.forks);
+  else filtered.sort((a,b)=>new Date(b.updated)-new Date(a.updated));
+  page=1;renderRepos();
+}
+
+function renderRepos(){
+  const total=filtered.length,pages=Math.ceil(total/PER_PAGE);
+  const slice=filtered.slice((page-1)*PER_PAGE,page*PER_PAGE);
+  document.getElementById("results-count").innerHTML=`Afișând <span>${slice.length}</span> din <span>${total}</span> repo-uri`;
+  document.getElementById("nav-count").textContent=total;
+  document.getElementById("repo-grid").innerHTML=slice.length===0
+    ?`<div class="empty" style="grid-column:1/-1"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg><h3>Niciun repo găsit</h3><p>Încearcă alt termen de căutare.</p></div>`
+    :slice.map(r=>`<div class="repo-card" onclick="window.open('https://github.com/Gzeu/${r.name}','_blank')">
+      <div class="repo-header">
+        <div class="repo-icon">${getEmoji(r.name)}</div>
+        <div class="repo-meta">
+          <div class="repo-name"><a href="https://github.com/Gzeu/${r.name}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${r.name}</a>${r.fork?'<span class="repo-fork-badge">fork</span>':''}</div>
+          <div class="repo-time">actualizat ${relTime(r.updated)}</div>
+        </div>
+      </div>
+      <div class="repo-desc">${r.desc||'<span style="color:var(--faint);font-style:italic">Fără descriere</span>'}</div>
+      ${r.topics&&r.topics.length?`<div class="repo-topics">${r.topics.map(t=>`<span class="topic">${t}</span>`).join("")}</div>`:""}
+      <div class="repo-footer">
+        ${r.lang?`<span class="lang-dot" style="background:${getLangColor(r.lang)}"></span><span class="lang-name">${r.lang}</span>`:""}
+        <div class="repo-stats">
+          ${r.stars>0?`<span class="repo-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>${r.stars}</span>`:""}
+          ${r.forks>0?`<span class="repo-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M6 9v3M18 9c0-3-3-3-3-3H9"/></svg>${r.forks}</span>`:""}
+          ${r.issues>0?`<span class="repo-stat" style="color:var(--red)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${r.issues}</span>`:""}
+        </div>
+      </div>
+    </div>`).join("");
+  const pag=document.getElementById("pagination");
+  if(pages<=1){pag.innerHTML="";return;}
+  let h=`<button class="page-btn" onclick="goPage(${page-1})" ${page===1?"disabled":""}>←</button>`;
+  for(let i=1;i<=pages;i++){if(pages>7&&i>2&&i<pages-1&&Math.abs(i-page)>1){if(i===3||i===pages-2)h+=`<span style="color:var(--faint);padding:0 4px">…</span>`;continue;}h+=`<button class="page-btn${i===page?" active":""}" onclick="goPage(${i})">${i}</button>`;}
+  h+=`<button class="page-btn" onclick="goPage(${page+1})" ${page===pages?"disabled":""}>→</button>`;
+  pag.innerHTML=h;
+}
+
+function goPage(p){page=p;renderRepos();window.scrollTo(0,0)}
+function onSearch(v){query=v;applyFilters()}
+function onSort(v){sortBy=v;applyFilters()}
+
+function renderLangFilters(){
+  const langs=["all",...new Set(REPOS.map(r=>r.lang).filter(Boolean)).values()].sort((a,b)=>a==="all"?-1:b==="all"?1:a.localeCompare(b));
+  document.getElementById("lang-filters").innerHTML=langs.map(l=>`<button class="filter-chip${l===activeLang?" active":""}" onclick="setLang('${l}')">${l==="all"?"Toate":l}</button>`).join("");
+}
+function setLang(l){activeLang=l;renderLangFilters();applyFilters()}
+
+function renderVercel(){
+  document.getElementById("vercel-grid").innerHTML=VERCEL_PROJECTS.map(p=>`
+    <div class="vercel-card">
+      <div class="vercel-card-header">
+        <div class="vercel-logo"><svg width="18" height="18" viewBox="0 0 76 65" fill="currentColor"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z"/></svg></div>
+        <div style="flex:1;min-width:0"><div class="vercel-project-name">${p.name}</div><div class="vercel-framework">${p.framework}</div></div>
+        <div class="status-dot" title="Active"></div>
+      </div>
+      <a class="vercel-url" href="https://${p.url}" target="_blank" rel="noopener">↗ ${p.url}</a>
+    </div>`).join("");
+}
+
+function renderStats(){
+  document.querySelectorAll("[data-target]").forEach(el=>{
+    const target=parseInt(el.dataset.target);let cur=0;const step=Math.ceil(target/40);
+    const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(t)},30);
+  });
+  const counts={};REPOS.forEach(r=>{if(r.lang){counts[r.lang]=(counts[r.lang]||0)+1}});
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const total=REPOS.length;
+  document.getElementById("lang-bars").innerHTML=sorted.map(([lang,cnt])=>{
+    const pct=Math.round(cnt/total*100);
+    return`<div class="lang-bar-row"><div class="lang-bar-name">${lang}</div><div class="lang-bar-track"><div class="lang-bar-fill" style="width:0%;background:${getLangColor(lang)}" data-w="${pct}%"></div></div><div class="lang-bar-pct">${pct}%</div></div>`;
+  }).join("");
+  setTimeout(()=>{document.querySelectorAll(".lang-bar-fill").forEach(el=>{el.style.width=el.dataset.w})},50);
+}
+
+function switchTab(id,el){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  el.classList.add("active");
+  if(id==="stats")renderStats();
+}
+
+function toggleTheme(){
+  const h=document.documentElement,isDark=h.getAttribute("data-theme")==="dark";
+  h.setAttribute("data-theme",isDark?"light":"dark");
+}
+
+renderLangFilters();applyFilters();renderVercel();
+</script>
+</body>
+</html>
